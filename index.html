@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Report: Genomic Data Visualization & BED Format Analysis</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="academic-theme light-theme">
+    <!-- Theme Toggle Floating Button -->
+    <button id="theme-toggle" class="theme-btn" aria-label="Toggle dark/light theme">
+        <i class="fa-solid fa-moon"></i>
+    </button>
+
+    <!-- App Container -->
+    <div class="app-layout">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-box">
+                    <i class="fa-solid fa-dna logo-icon"></i>
+                    <span>GENOME.IO</span>
+                </div>
+                <div class="doc-badge">Research Portal</div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="#abstract" class="nav-link active"><i class="fa-solid fa-file-lines"></i> Abstract</a></li>
+                    <li><a href="#introduction" class="nav-link"><i class="fa-solid fa-circle-info"></i> 1. Introduction</a></li>
+                    <li><a href="#history" class="nav-link"><i class="fa-solid fa-clock-rotate-left"></i> 2. Origins &amp; Motivation</a></li>
+                    <li><a href="#specification" class="nav-link"><i class="fa-solid fa-table-list"></i> 3. BED File Structure</a></li>
+                    <li><a href="#coordinate-system" class="nav-link"><i class="fa-solid fa-calculator"></i> 4. Coordinate Mechanics</a></li>
+                    <li><a href="#customization" class="nav-link"><i class="fa-solid fa-sliders"></i> 5. Track Configurations</a></li>
+                    <li><a href="#sandbox" class="nav-link sandbox-link"><i class="fa-solid fa-vials"></i> 6. Browser Sandbox</a></li>
+                    <li><a href="#architecture" class="nav-link"><i class="fa-solid fa-network-wired"></i> 7. Render Architecture</a></li>
+                    <li><a href="#notebook" class="nav-link"><i class="fa-solid fa-book-open"></i> 8. Internship Archives</a></li>
+                    <li><a href="#applications" class="nav-link"><i class="fa-solid fa-microscope"></i> 9. Practical Pipelines</a></li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-card">
+                    <div class="user-avatar">
+                        <i class="fa-solid fa-user-graduate"></i>
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name">Anannya Vyas</span>
+                        <span class="user-role">FSAI Summer Intern</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- Journal Style Header Banner -->
+            <header class="report-header">
+                <div class="journal-meta">
+                    <span class="journal-tag">Technical Report Series</span>
+                    <span class="divider">•</span>
+                    <span class="journal-date">June 2026</span>
+                </div>
+                <h1 class="report-title">
+                    Genomic Data Visualization Using BED Format and Genome Browsers
+                </h1>
+                <p class="report-subtitle">
+                    An engineering analysis of line-by-line coordinate serialization, rendering pipeline architectures, and interactive track customization.
+                </p>
+                
+                <!-- Authors & Institutional Affiliation -->
+                <div class="authors-section">
+                    <div class="authors-list">
+                        <span class="author-name lead-author">Anannya Vyas</span><sup>1,*</sup>,
+                        <span class="author-name helper-author">Antigravity AI</span><sup>2</sup>
+                    </div>
+                    <div class="affiliations-list">
+                        <p class="affiliation-item">
+                            <sup>1</sup> Summer Full Stack AI (FSAI) Intern, Design Innovation Centre (DIC), Panjab University, Chandigarh (in collaboration with UIET)
+                        </p>
+                        <p class="affiliation-item">
+                            <sup>2</sup> AI Pair Programmer, Google DeepMind
+                        </p>
+                    </div>
+                    <div class="correspondence-info">
+                        <span><sup>*</sup> Corresponding Author:</span> 
+                        <a href="mailto:anannyavyas@gmail.com" class="email-link"><i class="fa-solid fa-envelope"></i> anannyavyas@gmail.com</a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- 0. Abstract -->
+            <section id="abstract" class="report-section card">
+                <div class="section-badge">Executive Summary</div>
+                <h2>Abstract</h2>
+                <p class="abstract-text">
+                    Modern genomics produces datasets on the scale of gigabases, requiring high-performance, lightweight serialization formats to store features, annotations, and mapping configurations. This analysis breaks down the <strong>Browser Extensible Data (BED)</strong> file format, detailing its structural specifications, coordinate systems, and parser customization. Furthermore, we outline the engineering pipeline of <strong>Genome Browsers</strong>, detailing how file-based tab-delimited coordinate offsets are parsed, mapped, and rendered into interactive graphical layers. Included is an interactive genome browser emulation sandbox displaying exon boundaries, ChIP-Seq peaks, and clinical variant datasets, alongside historical records and notes collected during research.
+                </p>
+            </section>
+
+            <!-- 1. Introduction -->
+            <section id="introduction" class="report-section card">
+                <div class="section-badge">Section 1</div>
+                <h2>1. Introduction</h2>
+                <div class="section-grid-2">
+                    <div class="section-text">
+                        <p>
+                            In computational genomics, representing biological features (such as protein-coding genes, transcript splice sites, regulatory binding peaks, and single nucleotide polymorphisms) requires a balance between descriptive depth and parsing speed. Storing raw sequence assemblies (strings of G, A, T, and C) alongside annotations introduces extreme redundancy. 
+                        </p>
+                        <p>
+                            To solve this, bioinformatics relies on reference genomes—static baseline maps—and coordinate-based index files. This architecture allows developers to build lightweight layers over a unified coordinate axis. The most widely adopted format for this coordinate-based indexing is the <strong>Browser Extensible Data (BED)</strong> file, which couples directly with <strong>Genome Browsers</strong> to translate raw structural integers into responsive visual coordinates.
+                        </p>
+                    </div>
+                    <div class="info-callout">
+                        <div class="callout-header">
+                            <i class="fa-solid fa-lightbulb"></i>
+                            <span>Key Takeaway</span>
+                        </div>
+                        <p class="callout-content">
+                            BED files separate <strong>what</strong> is happening (the coordinate features) from the <strong>environment</strong> in which it happens (the genomic sequence database). The browser functions as a rendering engine, overlaying raw coordinate indices over its native visual assembly canvas.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. Origins & Motivation -->
+            <section id="history" class="report-section card">
+                <div class="section-badge">Section 2</div>
+                <h2>2. Origins &amp; Historical Motivation</h2>
+                <div class="history-container">
+                    <div class="quote-card">
+                        <div class="quote-icon"><i class="fa-solid fa-quote-left"></i></div>
+                        <blockquote>
+                            "He needed something small, tiny, fast, and flexible."
+                        </blockquote>
+                        <cite>— Internship Research Notes, UCSC Archives</cite>
+                    </div>
+                    <p>
+                        The BED format was conceived in the late 1990s at the <strong>University of California, Santa Cruz (UCSC)</strong> by computer scientist and bioinformatician <strong>W. James Kent</strong>. Kent was developing the UCSC Genome Browser, designed to display the draft assembly of the Human Genome Project.
+                    </p>
+                    <p>
+                        At the time, computational resources were heavily constrained. The massive size of genomic files threatened to slow down rendering engines. Kent needed a file format that could meet several strict criteria:
+                    </p>
+                    <div class="feature-bullets">
+                        <div class="bullet-item">
+                            <div class="bullet-num">1</div>
+                            <div class="bullet-desc">
+                                <strong>Extremely Small Footprint:</strong> Avoid sequence redundancy. The file must only store index markers, leaving sequence lookup to the browser's database.
+                            </div>
+                        </div>
+                        <div class="bullet-item">
+                            <div class="bullet-num">2</div>
+                            <div class="bullet-desc">
+                                <strong>High Parsing Speed:</strong> Plain text, whitespace-delimited fields that could be parsed instantly using simple C/C++ file streams or string tokenizers.
+                            </div>
+                        </div>
+                        <div class="bullet-item">
+                            <div class="bullet-num">3</div>
+                            <div class="bullet-desc">
+                                <strong>Extensible Layout:</strong> Allow researchers to add custom, application-specific columns at the end of rows without breaking legacy parser engines.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="metaphor-box">
+                        <div class="metaphor-title"><i class="fa-solid fa-map-location-dot"></i> The "Google Maps for DNA" Metaphor</div>
+                        <p>
+                            Just like modern digital mapping services load map tiles dynamically as a user pans and zooms, a Genome Browser works as a <strong>spatial database browser for DNA</strong>. The chromosomes are long, continuous coordinate lanes. The features in a BED file are markers, landmarks, and routes mapped precisely to those lanes, rendered on demand as the user zooms into specific base-pair zones.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. BED File Structure -->
+            <section id="specification" class="report-section card">
+                <div class="section-badge">Section 3</div>
+                <h2>3. Structural Breakdown of the BED File Format</h2>
+                <p>
+                    A BED file is structured as a plain-text document consisting of lines representing individual genomic features. Columns are separated by tabs (or occasionally other whitespaces). The format allows a varying depth of annotation, starting from 3 mandatory columns up to a maximum of 12 columns.
+                </p>
+                
+                <h3>Mandatory Coordinate Columns</h3>
+                <div class="table-container">
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Col</th>
+                                <th>Field Name</th>
+                                <th>Data Type</th>
+                                <th>Definition</th>
+                                <th>Example</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="highlight-row">
+                                <td>1</td>
+                                <td><code>chrom</code></td>
+                                <td>String</td>
+                                <td>The chromosome or scaffold identifier. Must match reference naming.</td>
+                                <td><code>chr7</code>, <code>chrX</code>, <code>chrM</code></td>
+                            </tr>
+                            <tr class="highlight-row">
+                                <td>2</td>
+                                <td><code>chromStart</code></td>
+                                <td>Integer</td>
+                                <td>Starting coordinate using <strong>0-based indexing</strong>.</td>
+                                <td><code>127471196</code></td>
+                            </tr>
+                            <tr class="highlight-row">
+                                <td>3</td>
+                                <td><code>chromEnd</code></td>
+                                <td>Integer</td>
+                                <td>Ending coordinate (non-inclusive boundary).</td>
+                                <td><code>127472365</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Extensible Optional Columns</h3>
+                <p>
+                    Columns 4 through 12 add rich metadata. If optional columns are used, they must be filled in order from left to right.
+                </p>
+                <div class="table-container">
+                    <table class="report-table">
+                        <thead>
+                            <tr>
+                                <th>Col</th>
+                                <th>Field Name</th>
+                                <th>Data Type</th>
+                                <th>Usage</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>4</td>
+                                <td><code>name</code></td>
+                                <td>String</td>
+                                <td>Identifier label for the feature</td>
+                                <td>e.g., Gene name, Peak ID, Mutation identifier.</td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td><code>score</code></td>
+                                <td>Integer</td>
+                                <td>Statistical value between 0 and 1000</td>
+                                <td>Dictates grayscale opacity or peak confidence.</td>
+                            </tr>
+                            <tr>
+                                <td>6</td>
+                                <td><code>strand</code></td>
+                                <td>Char</td>
+                                <td>Direction of transcription or feature</td>
+                                <td><code>+</code> (forward), <code>-</code> (reverse), or <code>.</code> (unstranded).</td>
+                            </tr>
+                            <tr>
+                                <td>7</td>
+                                <td><code>thickStart</code></td>
+                                <td>Integer</td>
+                                <td>Start of thick (coding region) block</td>
+                                <td>Used to draw exons vs. untranslated regions (UTRs).</td>
+                            </tr>
+                            <tr>
+                                <td>8</td>
+                                <td><code>thickEnd</code></td>
+                                <td>Integer</td>
+                                <td>End of thick (coding region) block</td>
+                                <td>Non-inclusive coding boundary.</td>
+                            </tr>
+                            <tr>
+                                <td>9</td>
+                                <td><code>itemRgb</code></td>
+                                <td>String</td>
+                                <td>RGB color code override</td>
+                                <td>Formatted as `R,G,B` (e.g., `255,0,0` for bright red).</td>
+                            </tr>
+                            <tr>
+                                <td>10</td>
+                                <td><code>blockCount</code></td>
+                                <td>Integer</td>
+                                <td>Number of sub-blocks (exons)</td>
+                                <td>Dictates how many distinct structural chunks to render.</td>
+                            </tr>
+                            <tr>
+                                <td>11</td>
+                                <td><code>blockSizes</code></td>
+                                <td>Int List</td>
+                                <td>Comma-separated sizes of sub-blocks</td>
+                                <td>Lengths of each individual block in base pairs.</td>
+                            </tr>
+                            <tr>
+                                <td>12</td>
+                                <td><code>blockStarts</code></td>
+                                <td>Int List</td>
+                                <td>Comma-separated start offsets of blocks</td>
+                                <td>Offsets relative to `chromStart`.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 4. Coordinate Mechanics -->
+            <section id="coordinate-system" class="report-section card">
+                <div class="section-badge">Section 4</div>
+                <h2>4. The Coordinate Mechanics (0-Based vs. 1-Based)</h2>
+                <p>
+                    One of the most critical aspects of parsing BED files is understanding its <strong>0-based half-open coordinate system</strong>. This differs from other bioinformatics formats (like GFF, GTF, or SAM) which use <strong>1-based fully closed indexing</strong>.
+                </p>
+
+                <!-- Interactive Visual Comparison Diagram -->
+                <div class="coordinate-interactive">
+                    <div class="coord-diagram-wrapper">
+                        <h4>Visual Coordinate Comparison</h4>
+                        <div class="dna-scale">
+                            <div class="scale-ticks">
+                                <div><span>0</span></div>
+                                <div><span>1</span></div>
+                                <div><span>2</span></div>
+                                <div><span>3</span></div>
+                                <div><span>4</span></div>
+                                <div><span>5</span></div>
+                                <div><span>6</span></div>
+                                <div><span>7</span></div>
+                                <div><span>8</span></div>
+                            </div>
+                            <div class="dna-bases">
+                                <div class="dna-base" data-index="0">A</div>
+                                <div class="dna-base" data-index="1">T</div>
+                                <div class="dna-base" data-index="2">G</div>
+                                <div class="dna-base" data-index="3">C</div>
+                                <div class="dna-base" data-index="4">A</div>
+                                <div class="dna-base" data-index="5">G</div>
+                                <div class="dna-base" data-index="6">T</div>
+                                <div class="dna-base" data-index="7">A</div>
+                            </div>
+                            <div class="coord-overlay-bracket">
+                                <div class="selected-bracket-line" style="left: 25%; width: 50%;"></div>
+                                <div class="selected-bracket-label">Selected Sequence: G - C - A - G</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="coord-details-grid">
+                        <div class="coord-system-card system-0based">
+                            <h5>0-Based, Half-Open (BED Format)</h5>
+                            <p class="formula">Start = 2, End = 6</p>
+                            <p class="description">
+                                Indexing starts at <strong>0</strong>. The `chromStart` points to the line <em>before</em> the first base, and `chromEnd` points to the line <em>after</em> the last base. 
+                                <br><strong>Advantage:</strong> Length calculation is a simple subtraction: 
+                                <span class="math">Length = End - Start (6 - 2 = 4 bases)</span>.
+                            </p>
+                        </div>
+                        <div class="coord-system-card system-1based">
+                            <h5>1-Based, Closed (GFF / GTF Format)</h5>
+                            <p class="formula">Start = 3, End = 6</p>
+                            <p class="description">
+                                Indexing starts at <strong>1</strong>. Both boundaries are inclusive: the first base is 1, and the end coordinate points to the actual last base. 
+                                <br><strong>Advantage:</strong> Intuitive human reading, but requires addition for length: 
+                                <span class="math">Length = (End - Start) + 1 (6 - 3 + 1 = 4 bases)</span>.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. Track Configurations -->
+            <section id="customization" class="report-section card">
+                <div class="section-badge">Section 5</div>
+                <h2>5. Track Customization &amp; Parameter Parsing</h2>
+                <p>
+                    Before coordinate coordinates are listed, BED files can declare custom parameters to control how genome browsers format the visual representation. This is achieved via a <strong>Track Line</strong> on the first line of the file.
+                </p>
+                <p>
+                    This declarative format instructs the rendering engine's drawing parameters before rendering the data shapes. Below is the track line specification:
+                </p>
+
+                <div class="code-editor-wrapper">
+                    <div class="editor-header">
+                        <span class="editor-dot red"></span>
+                        <span class="editor-dot yellow"></span>
+                        <span class="editor-dot green"></span>
+                        <span class="editor-title">sample_annotation.bed</span>
+                    </div>
+                    <pre><code><span class="code-track">track</span> <span class="code-param">name</span>=<span class="code-val">"Sample_ChIP_Peaks"</span> <span class="code-param">description</span>=<span class="code-val">"High-Confidence Binding Regions"</span> <span class="code-param">color</span>=<span class="code-val">255,0,0</span> <span class="code-param">visibility</span>=<span class="code-val">full</span>
+chr1    1254300    1254900    Peak_Alpha    910    +
+chr1    4512000    4512450    Peak_Beta     620    -</code></pre>
+                </div>
+
+                <div class="params-explainer">
+                    <div class="param-box">
+                        <h6><code>visibility</code> Modes</h6>
+                        <ul class="clean-list">
+                            <li><strong><code>full</code></strong>: Each feature block occupies its own horizontal track line. Captions and labels are fully visible.</li>
+                            <li><strong><code>dense</code></strong>: All features collapse onto a single row, layering on top of one another to maximize screen space.</li>
+                            <li><strong><code>squish</code></strong>: Features overlap horizontally, height is reduced to 1/3, and labels are hidden.</li>
+                            <li><strong><code>pack</code></strong>: Features are packed horizontally on multiple lines to avoid overlap, keeping labels visible.</li>
+                        </ul>
+                    </div>
+                    <div class="param-box">
+                        <h6>Visual Overrides</h6>
+                        <ul class="clean-list">
+                            <li><strong><code>color=R,G,B</code></strong>: RGB integers dictating track colors. Custom palettes can represent different experiments.</li>
+                            <li><strong><code>score</code></strong> Scaling: When score (col 5) is utilized, browsers dynamically calculate the feature's alpha transparency:
+                            <span class="formula">Alpha = Score / 1000</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. Interactive Browser Sandbox (Interactive Component) -->
+            <section id="sandbox" class="report-section card sandbox-card">
+                <div class="section-badge glow">Interactive Sandbox</div>
+                <h2>6. Genome Browser Sandbox</h2>
+                <p class="section-desc">
+                    Test the relationship between raw coordinates and visual tracks in real time. Use the presets to load genomic features, edit the coordinates in the editor, and interact with the rendering window below.
+                </p>
+
+                <!-- Sandbox Layout -->
+                <div class="sandbox-container">
+                    
+                    <!-- Left Column: Data Editor & Presets -->
+                    <div class="sandbox-editor-panel">
+                        <div class="panel-header">
+                            <span><i class="fa-solid fa-code"></i> BED Input Editor</span>
+                            <div class="preset-dropdown-container">
+                                <button id="preset-btn" class="sandbox-btn select-btn"><i class="fa-solid fa-folder-open"></i> Load Presets <i class="fa-solid fa-chevron-down"></i></button>
+                                <div id="presets-menu" class="dropdown-menu">
+                                    <button class="preset-opt" data-preset="brca1">
+                                        <i class="fa-solid fa-dna text-teal"></i>
+                                        <span>BRCA1 Spliced Exons (Bed12)</span>
+                                    </button>
+                                    <button class="preset-opt" data-preset="chip">
+                                        <i class="fa-solid fa-chart-area text-purple"></i>
+                                        <span>ChIP-Seq Peaks (Bed6 + Scores)</span>
+                                    </button>
+                                    <button class="preset-opt" data-preset="cancer">
+                                        <i class="fa-solid fa-skull-crossbones text-red"></i>
+                                        <span>Cancer Mutation Markers (RGB)</span>
+                                    </button>
+                                    <button class="preset-opt" data-preset="handwritten">
+                                        <i class="fa-solid fa-book-open text-blue"></i>
+                                        <span>Internship Notebook Example</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <textarea id="bed-input" class="bed-textarea" spellcheck="false"></textarea>
+                        
+                        <div class="editor-actions">
+                            <span id="syntax-status" class="syntax-status text-green"><i class="fa-solid fa-circle-check"></i> Syntax Valid</span>
+                            <button id="render-btn" class="sandbox-btn primary-btn"><i class="fa-solid fa-rotate"></i> Parse &amp; Render</button>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Visualizer Window -->
+                    <div class="sandbox-render-panel">
+                        <div class="panel-header">
+                            <span><i class="fa-solid fa-image"></i> Render Window</span>
+                            <div class="viewport-stats">
+                                <span id="active-assembly"><i class="fa-solid fa-database"></i> Assembly: <strong>hg38</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- Render Screen -->
+                        <div class="visualizer-screen">
+                            
+                            <!-- Scale / Navigation Controls Header -->
+                            <div class="visualizer-nav">
+                                <div class="coord-display">
+                                    <i class="fa-solid fa-location-crosshairs"></i>
+                                    <span id="coords-range">chr7:127,471,000 - 127,473,000</span>
+                                </div>
+                                <div class="view-controls">
+                                    <button id="zoom-in" class="ctrl-btn" title="Zoom In"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                                    <button id="zoom-out" class="ctrl-btn" title="Zoom Out"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                                    <button id="pan-left" class="ctrl-btn" title="Pan Left"><i class="fa-solid fa-arrow-left"></i></button>
+                                    <button id="pan-right" class="ctrl-btn" title="Pan Right"><i class="fa-solid fa-arrow-right"></i></button>
+                                    <button id="view-reset" class="ctrl-btn" title="Reset Range"><i class="fa-solid fa-arrows-rotate"></i></button>
+                                </div>
+                            </div>
+
+                            <!-- Canvas Container -->
+                            <div class="canvas-viewport">
+                                <!-- Ruler (Drawn in app.js or html scale) -->
+                                <canvas id="ruler-canvas" width="800" height="28"></canvas>
+                                <!-- Genomic Track Layer -->
+                                <div class="canvas-scroll-container">
+                                    <canvas id="tracks-canvas" width="800" height="220"></canvas>
+                                </div>
+                            </div>
+                            
+                            <!-- Hover Tooltip Pane -->
+                            <div id="feature-tooltip" class="visualizer-tooltip">
+                                <div class="tooltip-title">Hover over a feature to inspect</div>
+                                <div class="tooltip-coords">-</div>
+                                <div class="tooltip-details">
+                                    <span>Score: -</span>
+                                    <span>Strand: -</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Track Metadata Information Panel -->
+                        <div class="track-meta-panel">
+                            <div class="meta-section">
+                                <span class="meta-title">Parsed Track Name:</span>
+                                <span id="meta-track-name" class="meta-val">None</span>
+                            </div>
+                            <div class="meta-section">
+                                <span class="meta-title">Description:</span>
+                                <span id="meta-track-desc" class="meta-val">None</span>
+                            </div>
+                            <div class="meta-section">
+                                <span class="meta-title">Rendering Color:</span>
+                                <span id="meta-track-color" class="meta-val"><span class="color-indicator" style="background-color: var(--primary);"></span> Default</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7. Render Architecture -->
+            <section id="architecture" class="report-section card">
+                <div class="section-badge">Section 7</div>
+                <h2>7. Core Architectural Connection: Data to Visualization</h2>
+                <p>
+                    The relationship between a `.bed` file and a Genome Browser operates on a **Data Source to Engine** architecture. The browser holds the static, massive structural database framework of the reference genome, while the BED file serves as a dynamic, programmatic overlay.
+                </p>
+                <div class="architecture-grid">
+                    <div class="arch-box">
+                        <div class="arch-step-num">01</div>
+                        <h5>Coordinate Matching</h5>
+                        <p>
+                            The parser reads the `chrom` string, matches it against the selected reference assembly database (e.g., hg38 for human), and focuses the rendering viewport coordinates.
+                        </p>
+                    </div>
+                    <div class="arch-box">
+                        <div class="arch-step-num">02</div>
+                        <h5>Track Instantiation</h5>
+                        <p>
+                            The software instantiates a new vector drawing lane (Track), scaling it relative to existing lines.
+                        </p>
+                    </div>
+                    <div class="arch-box">
+                        <div class="arch-step-num">03</div>
+                        <h5>Geometric Coordinate Rendering</h5>
+                        <p>
+                            Using `chromStart` and `chromEnd` integer values, the rendering engine maps pixels across the screen coordinates relative to the user's zoom level.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="math-callout">
+                    <h5>Mathematical Mapping Formula</h5>
+                    <p>
+                        To map genomic bases to pixels, the rendering engine uses the following linear mapping equation for any chromosome coordinate position \( P \):
+                    </p>
+                    <div class="equation">
+                        \[X_{pixel} = W \times \frac{P - P_{start}}{P_{end} - P_{start}}\]
+                    </div>
+                    <p>
+                        Where:
+                    </p>
+                    <ul class="math-legend">
+                        <li>\( W \) is the width of the display viewport in pixels.</li>
+                        <li>\( P_{start} \) is the coordinate value at the left edge of the viewport.</li>
+                        <li>\( P_{end} \) is the coordinate value at the right edge of the viewport.</li>
+                        <li>\( X_{pixel} \) is the horizontal pixel offset on the canvas.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 8. Internship Archives -->
+            <section id="notebook" class="report-section card">
+                <div class="section-badge">Section 8</div>
+                <h2>8. Internship Research Archives</h2>
+                <p>
+                    To document the research process behind this analysis, below is a scan of the notes recorded during the author's internship, detailing the conceptual formulation of BED and UCSC Genome Browser functionality.
+                </p>
+                
+                <div class="notebook-panel">
+                    
+                    <!-- Left: Scanned Image with magnifying overlay -->
+                    <div class="notebook-image-container">
+                        <div class="image-wrapper">
+                            <img src="assets/notebook.png" alt="Internship Notebook Pages" class="notebook-img" id="notebook-img">
+                            <div class="image-tint"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right: Interactive Transcription Cards -->
+                    <div class="notebook-transcription">
+                        <div class="notebook-header">
+                            <i class="fa-solid fa-pen-nib"></i>
+                            <span>Notebook Transcription &amp; Notes</span>
+                        </div>
+
+                        <div class="transcription-tabs">
+                            <button class="tab-btn active" data-page="page-left">Left Page: Design Motivations</button>
+                            <button class="tab-btn" data-page="page-right">Right Page: BED Specifications</button>
+                        </div>
+                        
+                        <div class="transcription-content">
+                            <!-- Left Page Notes -->
+                            <div id="page-left" class="transcription-pane active">
+                                <div class="trans-card" data-ref="kent">
+                                    <div class="trans-tag">Concept 1</div>
+                                    <h6>Created by W. James Kent</h6>
+                                    <p>
+                                        Designed during the early development of the UCSC Genome Browser. Kent needed a file format that was:
+                                    </p>
+                                    <div class="mini-badges">
+                                        <span>Tiny</span>
+                                        <span>Fast</span>
+                                        <span>Flexible</span>
+                                    </div>
+                                </div>
+                                <div class="trans-card" data-ref="naming">
+                                    <div class="trans-tag">Terminology</div>
+                                    <h6>Name Origin Breakdowns</h6>
+                                    <ul>
+                                        <li><strong>B (Browser)</strong>: Built for UCSC Genome Browser visualization.</li>
+                                        <li><strong>E (Extensible)</strong>: Users can add extra custom columns to rows.</li>
+                                        <li><strong>D (Data)</strong>: Pure coordinate data format.</li>
+                                    </ul>
+                                </div>
+                                <div class="trans-card" data-ref="medical">
+                                    <div class="trans-tag">Cross-Reference</div>
+                                    <h6>Other Imaging Formats studied</h6>
+                                    <p>
+                                        Notes on margins note other medical/imaging scans examined during research: 
+                                        <code>X-Rays</code>, <code>CT</code>, <code>MRI</code>, <code>CBCT</code>.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Right Page Notes -->
+                            <div id="page-right" class="transcription-pane">
+                                <div class="trans-card" data-ref="date">
+                                    <div class="trans-tag">History</div>
+                                    <h6>UCSC Creation Date</h6>
+                                    <p>
+                                        Made in the late <strong>1990s</strong> (around 1999/2000 during Human Genome Assembly release) at the University of California, Santa Cruz (UCSC).
+                                    </p>
+                                </div>
+                                <div class="trans-card" data-ref="structure">
+                                    <div class="trans-tag">Syntax</div>
+                                    <h6>Plain-Text Whitespace Spreadsheet</h6>
+                                    <p>
+                                        Whitespace-delimited spreadsheet formatting, but kept as a simple plain text file. 
+                                        Example coordinates written: <code>chr7: 127471196</code>. Marks coordinates on DNA.
+                                    </p>
+                                </div>
+                                <div class="trans-card" data-ref="usage">
+                                    <div class="trans-tag">Biological Purpose</div>
+                                    <h6>Primary Engineering Usage</h6>
+                                    <ul>
+                                        <li>Finding active genes on DNA structures.</li>
+                                        <li>Locating and mapping cancer mutations.</li>
+                                        <li>General computational biology research.</li>
+                                    </ul>
+                                </div>
+                                <div class="trans-card" data-ref="analogy">
+                                    <div class="trans-tag">Analogy</div>
+                                    <h6>"Google Maps for DNA"</h6>
+                                    <p>
+                                        Used with UCSC Genome Browser. The browser serves as a dynamic spatial coordinates layout map.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- 9. Practical Pipelines -->
+            <section id="applications" class="report-section card">
+                <div class="section-badge">Section 9</div>
+                <h2>9. Practical Engineering Applications</h2>
+                <p>
+                    In active bioinformatics pipelines, BED coordinate exports serve as the standard interface intermediate between downstream mapping algorithms and browser verification tools.
+                </p>
+                <div class="apps-grid">
+                    <div class="app-card">
+                        <div class="app-icon text-teal"><i class="fa-solid fa-chart-line"></i></div>
+                        <h5>Peak Calling Analysis (ChIP-Seq)</h5>
+                        <p>
+                            Chromatin Immunoprecipitation sequencing algorithms identify protein-DNA binding interactions. The boundary coordinates of these binding sites are exported as a BED file (with statistical confidence in the <code>score</code> column) to visually cross-reference target promoter regions.
+                        </p>
+                    </div>
+                    <div class="app-card">
+                        <div class="app-icon text-red"><i class="fa-solid fa-dna"></i></div>
+                        <h5>Mutation Mapping (Variant Calling)</h5>
+                        <p>
+                            Clinical variants (SNPs or indels) derived from tumor sequencing are written into BED files, allowing researchers to overlay mutation hotspots over known oncology exons and genes.
+                        </p>
+                    </div>
+                    <div class="app-card">
+                        <div class="app-icon text-purple"><i class="fa-solid fa-scissors"></i></div>
+                        <h5>Transcriptomics (RNA-Seq Exons)</h5>
+                        <p>
+                            Splicing mapping tools resolve exon-exon junctions. The coordinates of transcript exons and introns are structured into BED12 blocks, rendering coding boundaries next to reference splicing isoforms.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="main-footer">
+                <p>© 2026 Design Innovation Centre (DIC), Panjab University. UIET Collaboration.</p>
+                <p>Report built with Antigravity AI pair programming. Authentically drafted by Anannya Vyas.</p>
+            </footer>
+        </main>
+    </div>
+
+    <!-- JS Logic -->
+    <script src="app.js"></script>
+</body>
+</html>
